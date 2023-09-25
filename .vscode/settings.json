@@ -1,0 +1,20 @@
+{
+    "python.formatting.provider": "black" ,
+    "python.terminal.activateEnvironment": false,
+
+    "files.exclude": {
+        "**/*.0": true,
+        "logs" :true,
+        "work_dir" :true,
+        "runs" : true,
+    },
+
+    "search.exclude": {
+        "**/*.0": true,
+        "logs" :true,
+        "work_dir" :true,
+        "runs" : true,
+        "saved": true
+    }
+}
+
