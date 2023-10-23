@@ -1,58 +1,18 @@
-import torch
-import numpy as np
-from monai.transforms import (
-    Compose,
-    LoadImaged,
-    EnsureChannelFirstd,
-    EnsureTyped,
-    Spacingd,
-    ScaleIntensityRanged,
-    ResizeWithPadOrCropd,
-    Resized,
-    ToTensord,
-    RepeatChanneld,
-    RandAffined,
-)
-from monai.data import CacheDataset
-import json
 import os
-join=os.path.join
-from pathlib import Path
-from utils.Transform import get_3d_single_box, slice_array, unify_spacing
-import nibabel as nib
 
-encoder_transform = Compose(
-    [
-        # load 4 Nifti images and stack them together
-        LoadImaged(keys=["3D_image", "3D_mask"]), 
-        EnsureChannelFirstd(keys=["3D_image", "3D_mask"]),
-        EnsureTyped(keys=["3D_image"], dtype=torch.float32),
-        EnsureTyped(keys=["3D_mask"], dtype=torch.int8),
-        ScaleIntensityRanged("3D_image", -1250, 500, 0, 1, True),
-        unify_spacing(64),
-        ResizeWithPadOrCropd(["3D_image", "3D_mask"], (128, 128, 128), "constant"),
-    ])
+def count_lines_of_code(directory):
+    total_lines = 0
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            # if file.endswith("segment_anything"):
+            #     continue
+            if file.endswith(".py"):  # 可以根据需要修改文件扩展名
+                with open(os.path.join(root, file), "r") as f:
+                    lines = f.readlines()
+                    total_lines += len(lines)
+    return total_lines
 
-
-with open("/data3/home/lishengyong/data/ssc_3d/slices/dataset_3d.json") as f:
-    data = json.load(f)
-
-
-test_encoder_ds = CacheDataset(
-    data=data["test"],
-    transform=encoder_transform,
-    cache_rate=0,
-    num_workers=8,
-)
-
-image_path = "/data3/home/lishengyong/data/ssc_3d/slices/infer_3d_iter/trans_images"
-mask_path = "/data3/home/lishengyong/data/ssc_3d/slices/infer_3d_iter/trans_masks"
-os.makedirs(image_path, exist_ok=True)
-os.makedirs(mask_path, exist_ok=True)
-for i in test_encoder_ds:
-    name = os.path.basename(i["3D_image"].meta["filename_or_obj"])
-    nib.save(nib.Nifti1Image(i["3D_image"][0].numpy(), None), join(image_path, name))
-    nib.save(nib.Nifti1Image(i["3D_mask"][0].numpy(), None), join(mask_path, name))
-    # print(i["3D_mask"].shape)
-
-
+if __name__ == "__main__":
+    code_directory = "/homes/syli/python/LVSI"  # 将 "your_code_directory" 替换为你的代码目录
+    total_lines = count_lines_of_code(code_directory)
+    print(f"Total lines of code: {total_lines}")
